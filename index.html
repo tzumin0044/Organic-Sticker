@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>有機貼專業列印器 - 40x70mm</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #e8f5e9;
+            --accent: #f57c00;
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --text: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 頂部控制列 */
+        header {
+            background: white;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .header-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        input[type="date"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .solar-day-display {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .btn-clear {
+            margin-left: auto;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-print {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-clear:hover {
+            background: #d32f2f;
+        }
+
+        /* 主區域 */
+        main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* 左側品項清單 */
+        .catalog {
+            flex: 0 0 300px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .catalog-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-add-product {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .product-list {
+            padding: 10px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* 彈窗樣式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 350px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .modal-field {
+            margin-bottom: 15px;
+        }
+
+        .modal-field label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .modal-field input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .modal-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-cancel {
+            background: #eee;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-confirm {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .product-item {
+            background: var(--primary-light);
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: 0.2s;
+            text-align: center;
+            font-size: 0.9em;
+            user-select: none;
+        }
+
+        .product-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 右側列印排程 */
+        .queue-container {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        #dropZone {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border: 2px dashed #eee;
+            margin: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .queue-item {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 50px;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 6px;
+        }
+
+        .queue-item .name {
+            font-weight: bold;
+        }
+
+        .spec-select,
+        .qty-input,
+        .weight-input {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .weight-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-remove {
+            color: #f44336;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        /* 右側換算清單 */
+        .conversion-container {
+            flex: 0 0 280px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .conv-input-group {
+            padding: 12px;
+            background: var(--primary-light);
+            border-bottom: 1px solid #eee;
+        }
+
+        .conv-input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+        }
+
+        .conv-main-input {
+            width: 100%;
+            padding: 8px;
+            font-size: 1.1em;
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            outline: none;
+            font-weight: bold;
+        }
+
+        .conv-list {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+
+        .conv-card {
+            padding: 10px;
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .conv-card-title {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.85em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .conv-card-result {
+            font-size: 1em;
+            font-family: 'Courier New', Courier, monospace;
+            color: #d32f2f;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.2;
+        }
+
+        .conv-card-hint {
+            font-size: 0.75em;
+            color: #888;
+            border-top: 1px dashed #eee;
+            padding-top: 3px;
+            margin-top: 2px;
+        }
+
+        .custom-conv-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        /* 隱藏的列印區域 */
+        #printArea {
+            display: none;
+        }
+
+        @page {
+            size: 40mm 70mm;
+            margin: 0 !important;
+        }
+
+        @media print {
+
+            html,
+            body {
+                width: 40mm !important;
+                height: 70mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white;
+                overflow: hidden;
+            }
+
+            body * {
+                visibility: hidden;
+            }
+
+            #printArea,
+            #printArea * {
+                visibility: visible;
+            }
+
+            #printArea {
+                display: block !important;
+                width: 40mm;
+                height: 70mm;
+                margin: 0;
+                padding: 0;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            .sticker {
+                width: 40mm;
+                height: 70mm;
+                box-sizing: border-box !important;
+                padding-top: 44mm !important;
+                /* <--- 調整此處：內容起始位置 (目前 44mm) */
+                padding-left: 0;
+                padding-right: 0;
+                position: relative;
+                page-break-after: always;
+                background: white;
+                color: black;
+                display: flex;
+                flex-direction: column;
+                border: none;
+            }
+
+            .st-content-zone {
+                width: 100%;
+                height: 16mm !important;
+                /* <--- 調整此處：內容可見高度 (46mm ~ 62mm) */
+                box-sizing: border-box !important;
+                /* zoom: 1.0; <--- 調整此處：整體比例大小 (例如 1.2 為放大 1.2 倍) */
+                display: flex;
+                flex-direction: column;
+                gap: 0.2mm;
+                padding-left: 5.8mm;
+                /* <--- 調整此處：內容左側偏移 */
+                overflow: hidden !important;
+                position: relative;
+            }
+
+            .st-name {
+                font-size: 12pt;
+                font-weight: 900;
+                line-height: 1;
+                margin: 0;
+                width: 75%;
+            }
+
+            .st-line {
+                font-size: 8pt;
+                font-weight: 900;
+                line-height: 1;
+            }
+
+            .st-solar-box {
+                position: absolute;
+                right: 1mm;
+                top: 4mm;
+                border: 1px solid black;
+                padding: 0.5mm;
+                font-size: 8pt;
+                font-weight: 900;
+                text-align: center;
+                min-width: 7mm;
+            }
+
+            .st-cert-body,
+            .st-cert-id {
+                font-size: 6.5pt;
+                font-weight: 900;
+                line-height: 1.1;
+                white-space: nowrap;
+            }
+        }
+
+        /* 空狀態提示 */
+        .empty-hint {
+            text-align: center;
+            color: #ccc;
+            margin-top: 50px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-item">
+            <label>出貨日期</label>
+            <input type="date" id="shipDate">
+        </div>
+        <div class="header-item">
+            <label>太陽日</label>
+            <div class="solar-day-display" id="solarDayVal">000</div>
+        </div>
+        <button class="btn-print" onclick="preparePrint()">確認列印</button>
+        <button class="btn-clear" onclick="resetAll()">全部重置</button>
+    </header>
+
+    <main>
+        <section class="catalog">
+            <div class="catalog-header">
+                品項清單
+                <button class="btn-add-product" onclick="openModal()" title="新增品項">+</button>
+            </div>
+            <div class="product-list" id="productList">
+                <!-- 品項將由 JS 生成 -->
+            </div>
+        </section>
+
+        <section class="queue-container">
+            <div class="catalog-header">列印排程區</div>
+            <div id="dropZone">
+                <div class="empty-hint">請點擊左側品項加入</div>
+            </div>
+        </section>
+
+        <!-- 換算清單區域 -->
+        <section class="conversion-container">
+            <div class="catalog-header">
+                包裝換算清單
+                <button class="btn-cancel" style="padding: 2px 8px; font-size: 0.8em;" onclick="clearConv()">清除</button>
+            </div>
+            <div class="conv-input-group" style="background: #e3f2fd;">
+                <label>請輸入總重量 (台斤)</label>
+                <input type="number" id="convTJInput" class="conv-main-input" style="border-color: #1976d2;"
+                    placeholder="0.0" oninput="convertTJtoKG()" onfocus="this.select()">
+                <div style="font-size: 0.7em; color: #1976d2; margin-top: 3px;">* 自動換算：1 台斤 = 0.6 KG</div>
+            </div>
+            <div class="conv-input-group">
+                <label>請輸入總重量 (KG)</label>
+                <input type="number" id="convTotalInput" class="conv-main-input" placeholder="0.0"
+                    oninput="convertKGtoTJ()" onfocus="this.select()">
+            </div>
+            <div class="conv-list">
+                <div class="conv-card">
+                    <div class="conv-card-title">3KG/包 <span>(3K)</span></div>
+                    <div class="conv-card-result" id="res3K">---</div>
+                </div>
+                <div class="conv-card">
+                    <div class="conv-card-title">5KG/包 <span>(5K)</span></div>
+                    <div class="conv-card-result" id="res5K">---</div>
+                </div>
+                <div class="conv-card">
+                    <div class="conv-card-title">12KG/包 <span>(12K)</span></div>
+                    <div class="conv-card-result" id="res12K">---</div>
+                </div>
+                <div class="conv-card">
+                    <div class="conv-card-title">自定義換算</div>
+                    <div class="custom-conv-row">
+                        <input type="number" id="customDivisor"
+                            style="width: 60px; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"
+                            placeholder="除數" oninput="runConversion()">
+                        <span style="font-size: 0.8em; color: #888;">K =</span>
+                    </div>
+                    <div class="conv-card-result" id="resCustom" style="margin-top: 5px;">---</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 新增品項彈窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3>新增品項</h3>
+            <div class="modal-field">
+                <label>品項名稱</label>
+                <input type="text" id="newProdName" placeholder="例如：有機舞菇">
+            </div>
+            <div class="modal-field">
+                <label>規格 (用逗號隔開)</label>
+                <input type="text" id="newProdSpecs" placeholder="例如：KG,1KG,3KG">
+            </div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn-confirm" onclick="addNewProduct()">新增</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="printArea"></div>
+
+    <script>
+        // 預設品項
+        const defaultProducts = [
+            { name: "有機杏鮑菇", specs: ["KG", "1KG", "3KG"] },
+            { name: "有機木耳", specs: ["KG", "3KG", "12KG"] },
+            { name: "有機銀耳", specs: ["KG"] },
+            { name: "有機金針菇", specs: ["KG", "1KG", "5KG"] },
+            { name: "有機黑珍珠", specs: ["KG", "1KG"] },
+            { name: "有機鴻喜菇", specs: ["KG", "1KG", "3KG"] },
+            { name: "有機雪白菇", specs: ["KG", "3KG"] },
+            { name: "有機秀珍菇", specs: ["KG", "3KG"] },
+            { name: "有機黑蠔菇", specs: ["KG", "1KG"] },
+            { name: "有機白精靈", specs: ["KG", "1KG", "200g"] },
+            { name: "有機珊瑚菇", specs: ["KG", "0.6K"] }
+        ];
+
+        // 從 localStorage 讀取或使用預設
+        let customProducts = JSON.parse(localStorage.getItem('organic_products')) || defaultProducts;
+
+        // 強制更新「有機白精靈」的規格，以確保使用者能看到 200g
+        const whiteElf = customProducts.find(p => p.name === "有機白精靈");
+        if (whiteElf && !whiteElf.specs.includes("200g")) {
+            whiteElf.specs.push("200g");
+            localStorage.setItem('organic_products', JSON.stringify(customProducts));
+        }
+
+        const shipDateInput = document.getElementById('shipDate');
+        const solarDayDisplay = document.getElementById('solarDayVal');
+        const productList = document.getElementById('productList');
+        const dropZone = document.getElementById('dropZone');
+        const printArea = document.getElementById('printArea');
+
+        // 初始化：設定日期為今天
+        const today = new Date().toISOString().split('T')[0];
+        shipDateInput.value = today;
+        updateSolarDay();
+        renderProductList();
+
+        // 監聽日期變更
+        shipDateInput.addEventListener('change', updateSolarDay);
+
+        function updateSolarDay() {
+            const date = new Date(shipDateInput.value);
+            if (isNaN(date)) return;
+
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
+            const oneDay = 1000 * 60 * 60 * 24;
+            const day = Math.floor(diff / oneDay);
+
+            const solarDay = day.toString().padStart(3, '0');
+            solarDayDisplay.textContent = solarDay;
+        }
+
+        // 生成左側品項清單
+        function renderProductList() {
+            productList.innerHTML = '';
+            customProducts.forEach((p, index) => {
+                const div = document.createElement('div');
+                div.className = 'product-item';
+                div.textContent = p.name;
+                div.title = "點擊加入列印排程";
+
+                div.onclick = () => addToQueue(p);
+
+                productList.appendChild(div);
+            });
+        }
+
+        // 彈窗控制
+        function openModal() { document.getElementById('modalOverlay').style.display = 'flex'; }
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('newProdName').value = '';
+            document.getElementById('newProdSpecs').value = '';
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('newProdName').value.trim();
+            const specsStr = document.getElementById('newProdSpecs').value.trim();
+
+            if (!name || !specsStr) {
+                alert('請填寫品項名稱與規格');
+                return;
+            }
+
+            const specs = specsStr.split(',').map(s => s.trim()).filter(s => s !== '');
+
+            customProducts.push({ name, specs });
+            localStorage.setItem('organic_products', JSON.stringify(customProducts));
+
+            renderProductList();
+            closeModal();
+        }
+
+        function convertTJtoKG() {
+            const tj = parseFloat(document.getElementById('convTJInput').value);
+            if (isNaN(tj)) {
+                document.getElementById('convTotalInput').value = '';
+                runConversion();
+                return;
+            }
+            const kg = (tj * 0.6).toFixed(2).replace(/\.?0+$/, '');
+            document.getElementById('convTotalInput').value = kg;
+            runConversion();
+        }
+
+        function convertKGtoTJ() {
+            const kg = parseFloat(document.getElementById('convTotalInput').value);
+            if (isNaN(kg)) {
+                document.getElementById('convTJInput').value = '';
+                runConversion();
+                return;
+            }
+            const tj = (kg / 0.6).toFixed(2).replace(/\.?0+$/, '');
+            document.getElementById('convTJInput').value = tj;
+            runConversion();
+        }
+
+        function runConversion() {
+            const total = parseFloat(document.getElementById('convTotalInput').value);
+            const customDiv = parseFloat(document.getElementById('customDivisor').value);
+
+            if (isNaN(total) || total <= 0) {
+                document.getElementById('res3K').textContent = "---";
+                document.getElementById('res5K').textContent = "---";
+                document.getElementById('res12K').textContent = "---";
+                document.getElementById('resCustom').textContent = "---";
+                return;
+            }
+
+            // 執行換算
+            document.getElementById('res3K').textContent = getConvStr(total, 3);
+            document.getElementById('res5K').textContent = getConvStr(total, 5);
+            document.getElementById('res12K').textContent = getConvStr(total, 12);
+
+            if (customDiv && customDiv > 0) {
+                document.getElementById('resCustom').textContent = getConvStr(total, customDiv);
+            } else {
+                document.getElementById('resCustom').textContent = "---";
+            }
+        }
+
+        function getConvStr(total, boxSize) {
+            const count = Math.floor(total / boxSize);
+            const remainder = (total % boxSize).toFixed(1).replace(/\.0$/, '');
+
+            let res = `${boxSize}K(${count}張)`;
+            if (parseFloat(remainder) > 0) {
+                res += ` + ${remainder}KG(1張)`;
+            }
+            return res;
+        }
+
+        // 鍵盤快速聚焦
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'f' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                document.getElementById('convTotalInput').focus();
+            }
+        });
+
+        // 點擊新增邏輯
+        function addToQueue(product) {
+            const hint = dropZone.querySelector('.empty-hint');
+            if (hint) hint.remove();
+
+            const item = document.createElement('div');
+            item.className = 'queue-item';
+
+            const specOptions = product.specs.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            item.innerHTML = `
+                <div class="name">${product.name}</div>
+                <div class="weight-group">
+                    <select class="spec-select" onchange="toggleWeightInput(this)">
+                        ${specOptions}
+                    </select>
+                    <input type="number" step="0.1" class="weight-input" style="display: ${product.specs[0] === 'KG' ? 'block' : 'none'}" placeholder="數字">
+                </div>
+                <div>張數: <input type="number" class="qty-input" value="1" min="1" onfocus="this.select()"></div>
+                <div class="btn-remove" onclick="this.parentElement.remove()">×</div>
+            `;
+
+            item.querySelector('.qty-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const nextItem = item.nextElementSibling;
+                    if (nextItem) {
+                        const nextInput = nextItem.querySelector('.qty-input');
+                        if (nextInput) nextInput.focus();
+                    }
+                }
+            });
+
+            dropZone.appendChild(item);
+            item.querySelector('.qty-input').focus();
+        }
+
+        function toggleWeightInput(select) {
+            const input = select.parentElement.querySelector('.weight-input');
+            if (select.value === 'KG') {
+                input.style.display = 'block';
+            } else {
+                input.style.display = 'none';
+                input.value = '';
+            }
+        }
+
+        function clearConv() {
+            document.getElementById('convTJInput').value = '';
+            document.getElementById('convTotalInput').value = '';
+            document.getElementById('customDivisor').value = '';
+            document.getElementById('res3K').textContent = "---";
+            document.getElementById('res5K').textContent = "---";
+            document.getElementById('res12K').textContent = "---";
+            document.getElementById('resCustom').textContent = "---";
+        }
+
+        function resetAll() {
+            if (confirm('確定要清除列印排程嗎？')) {
+                // 僅清除列印排程
+                dropZone.innerHTML = '<div class="empty-hint">請點擊左側品項加入</div>';
+            }
+        }
+
+        function preparePrint() {
+            const items = dropZone.querySelectorAll('.queue-item');
+            if (items.length === 0) {
+                alert('排程區是空的！');
+                return;
+            }
+
+            // 防呆檢查：檢查每一項的張數與重量是否有效
+            for (let item of items) {
+                const name = item.querySelector('.name').textContent;
+
+                // 1. 檢查張數
+                const qtyInput = item.querySelector('.qty-input');
+                const qtyVal = qtyInput.value.trim();
+                if (qtyVal === "" || parseFloat(qtyVal) <= 0 || isNaN(parseFloat(qtyVal))) {
+                    alert(`錯誤：品項「${name}」的列印張數不可為空白或 0！`);
+                    qtyInput.focus();
+                    qtyInput.select();
+                    return;
+                }
+
+                // 2. 檢查重量 (僅當規格選擇為 "KG" 時)
+                const specSelect = item.querySelector('.spec-select');
+                if (specSelect.value === 'KG') {
+                    const weightInput = item.querySelector('.weight-input');
+                    const weightVal = weightInput.value.trim();
+                    if (weightVal === "" || parseFloat(weightVal) <= 0 || isNaN(parseFloat(weightVal))) {
+                        alert(`錯誤：品項「${name}」的重量不可為空白或 0！`);
+                        weightInput.focus();
+                        weightInput.select();
+                        return;
+                    }
+                }
+            }
+
+            printArea.innerHTML = '';
+            const solarDay = solarDayDisplay.textContent;
+
+            items.forEach(item => {
+                const name = item.querySelector('.name').textContent;
+                const spec = item.querySelector('.spec-select').value;
+                const weightVal = item.querySelector('.weight-input').value;
+                const qty = parseInt(item.querySelector('.qty-input').value);
+
+                let weightText = spec;
+                if (spec === 'KG') {
+                    weightText = (weightVal || '0') + 'KG';
+                }
+
+                for (let i = 0; i < qty; i++) {
+                    const sticker = document.createElement('div');
+                    sticker.className = 'sticker';
+                    sticker.innerHTML = `
+                        <div class="st-content-zone">
+                            <div class="st-name">${name}</div>
+                            <div class="st-line">重量:${weightText}</div>
+                            <div class="st-line">產地:台灣</div>
+                            <div class="st-solar-box">${solarDay}</div>
+                            <div class="st-cert-body">驗證機構:采園生態驗證有限公司</div>
+                            <div class="st-cert-id">證書字號:1-008-180101</div>
+                        </div>
+                    `;
+                    printArea.appendChild(sticker);
+                }
+            });
+
+            window.print();
+        }
+    </script>
+</body>
+
+</html>
