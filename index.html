@@ -744,11 +744,15 @@
             return res;
         }
 
-        // 鍵盤快速聚焦
+        // 鍵盤快速聚焦與攔截 Ctrl+P
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'f' && (e.ctrlKey || e.metaKey)) {
+            if (e.key.toLowerCase() === 'f' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 document.getElementById('convTotalInput').focus();
+            }
+            if (e.key.toLowerCase() === 'p' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                preparePrint();
             }
         });
 
@@ -815,6 +819,45 @@
             }
         }
 
+        function generatePrintContent() {
+            const items = dropZone.querySelectorAll('.queue-item');
+            printArea.innerHTML = '';
+            const solarDay = solarDayDisplay.textContent;
+
+            items.forEach(item => {
+                const name = item.querySelector('.name').textContent;
+                const spec = item.querySelector('.spec-select').value;
+                const weightInput = item.querySelector('.weight-input');
+                const weightVal = weightInput ? weightInput.value : '';
+                const qtyInput = item.querySelector('.qty-input');
+                const qty = qtyInput ? (parseInt(qtyInput.value) || 0) : 0;
+
+                let weightText = spec;
+                if (spec === 'KG') {
+                    weightText = (weightVal || '0') + 'KG';
+                }
+
+                for (let i = 0; i < qty; i++) {
+                    const sticker = document.createElement('div');
+                    sticker.className = 'sticker';
+                    sticker.innerHTML = `
+                        <div class="st-content-zone">
+                            <div class="st-name">${name}</div>
+                            <div class="st-line">重量:${weightText}</div>
+                            <div class="st-line">產地:台灣</div>
+                            <div class="st-solar-box">${solarDay}</div>
+                            <div class="st-cert-body">驗證機構:采園生態驗證有限公司</div>
+                            <div class="st-cert-id">證書字號:1-008-180101</div>
+                        </div>
+                    `;
+                    printArea.appendChild(sticker);
+                }
+            });
+        }
+
+        // 監聽 beforeprint 事件以在列印前即時更新內容（適用於透過瀏覽器選單列印的情境）
+        window.addEventListener('beforeprint', generatePrintContent);
+
         function preparePrint() {
             const items = dropZone.querySelectorAll('.queue-item');
             if (items.length === 0) {
@@ -850,37 +893,7 @@
                 }
             }
 
-            printArea.innerHTML = '';
-            const solarDay = solarDayDisplay.textContent;
-
-            items.forEach(item => {
-                const name = item.querySelector('.name').textContent;
-                const spec = item.querySelector('.spec-select').value;
-                const weightVal = item.querySelector('.weight-input').value;
-                const qty = parseInt(item.querySelector('.qty-input').value);
-
-                let weightText = spec;
-                if (spec === 'KG') {
-                    weightText = (weightVal || '0') + 'KG';
-                }
-
-                for (let i = 0; i < qty; i++) {
-                    const sticker = document.createElement('div');
-                    sticker.className = 'sticker';
-                    sticker.innerHTML = `
-                        <div class="st-content-zone">
-                            <div class="st-name">${name}</div>
-                            <div class="st-line">重量:${weightText}</div>
-                            <div class="st-line">產地:台灣</div>
-                            <div class="st-solar-box">${solarDay}</div>
-                            <div class="st-cert-body">驗證機構:采園生態驗證有限公司</div>
-                            <div class="st-cert-id">證書字號:1-008-180101</div>
-                        </div>
-                    `;
-                    printArea.appendChild(sticker);
-                }
-            });
-
+            generatePrintContent();
             window.print();
         }
     </script>
