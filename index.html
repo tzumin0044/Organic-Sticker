@@ -29,15 +29,15 @@
             height: 100vh;
         }
 
-        /* 頂部控制列 */
+        /* 出貨控制列 */
         header {
             background: white;
-            padding: 15px 25px;
+            padding: 10px 25px;
             display: flex;
             align-items: center;
             gap: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            z-index: 90;
         }
 
         .header-item {
@@ -90,6 +90,384 @@
 
         .btn-clear:hover {
             background: #d32f2f;
+        }
+
+        /* 鎖定按鈕樣式 */
+        .btn-lock {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .btn-lock.locked {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-lock.locked:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .btn-lock.unlocked {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1.5px solid #ea580c;
+            box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15);
+            animation: pulse-orange 2s infinite;
+        }
+
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.35); }
+            70% { box-shadow: 0 0 0 6px rgba(234, 88, 12, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
+        }
+
+        /* 密碼彈窗特定樣式 */
+        .pwd-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.4em;
+            text-align: center;
+            letter-spacing: 6px;
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            outline: none;
+            font-weight: bold;
+        }
+
+        .pwd-input:focus {
+            border-color: #d97706;
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+        }
+
+        /* 頂部週曆太陽日速查列 */
+        .week-bar-container {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            z-index: 90;
+        }
+
+        .week-nav-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .btn-week-nav {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            padding: 6px 11px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .btn-week-nav:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-open-month-cal {
+            background: var(--primary-light);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            margin-left: auto;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .btn-open-month-cal:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .week-cards {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            overflow-x: auto;
+            padding: 4px 2px;
+        }
+
+        .week-card {
+            flex: 1;
+            min-width: 90px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 5px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            user-select: none;
+        }
+
+        .week-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .week-card.is-today {
+            border-color: var(--accent);
+            background: #fffdf5;
+            box-shadow: 0 0 0 1.5px var(--accent);
+        }
+
+        .week-card.is-selected {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.25);
+        }
+
+        .week-card .wc-day-name {
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            width: 100%;
+        }
+
+        .week-card.is-today .wc-day-name {
+            color: #d97706;
+        }
+
+        .week-card.is-selected .wc-day-name {
+            color: var(--primary);
+        }
+
+        .today-tag {
+            background: var(--accent);
+            color: white;
+            font-size: 0.75em;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            line-height: 1.2;
+            display: inline-block;
+        }
+
+        .week-card .wc-date {
+            font-size: 0.95em;
+            font-weight: 900;
+            color: #1e293b;
+            margin: 2px 0;
+        }
+
+        .week-card .wc-solar {
+            font-size: 0.8em;
+            font-weight: 800;
+            color: var(--primary);
+            background: rgba(46, 125, 50, 0.12);
+            padding: 1px 7px;
+            border-radius: 10px;
+        }
+
+        .week-card.is-today .wc-solar {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .week-card.is-past-disabled,
+        .month-cell.is-past-disabled {
+            opacity: 0.45;
+            background: #f1f5f9;
+            cursor: not-allowed;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .week-card.is-past-disabled:hover,
+        .month-cell.is-past-disabled:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #94a3b8;
+            background: #e2e8f0;
+        }
+
+        /* 全月太陽曆彈窗 */
+        .month-modal {
+            width: 640px;
+            max-width: 95vw;
+        }
+
+        .month-cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .month-cal-title-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .month-cal-title-group label {
+            font-size: 0.9em;
+            color: #475569;
+            font-weight: bold;
+        }
+
+        .cal-nav-input,
+        .cal-nav-select {
+            padding: 5px 8px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #1e293b;
+            font-size: 0.95em;
+            outline: none;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        .cal-nav-input:focus,
+        .cal-nav-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.15);
+        }
+
+        .cal-nav-input {
+            width: 82px;
+            text-align: center;
+        }
+
+        .cal-nav-select {
+            width: 85px;
+            cursor: pointer;
+        }
+
+        .month-cal-grid-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: bold;
+            color: #64748b;
+            font-size: 0.85em;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .month-cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 8px;
+            max-height: 52vh;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+
+        .month-cell {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 3px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            position: relative;
+        }
+
+        .month-cell:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: scale(1.04);
+            z-index: 2;
+        }
+
+        .month-cell.other-month {
+            opacity: 0.35;
+            background: #f8fafc;
+        }
+
+        .month-cell.is-today {
+            border-color: var(--accent);
+            background: #fffdf5;
+            font-weight: bold;
+        }
+
+        .month-cell.is-selected {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .month-cell-day {
+            font-size: 0.95em;
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .month-cell-solar {
+            font-size: 0.75em;
+            color: var(--primary);
+            background: rgba(46, 125, 50, 0.12);
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .month-cell.is-today .month-cell-solar {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .month-cell-today-dot {
+            width: 5px;
+            height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            right: 3px;
         }
 
         /* 主區域 */
@@ -494,16 +872,33 @@
 
 <body>
 
+    <!-- 頂部週曆太陽日速查列 (置頂) -->
+    <section class="week-bar-container">
+        <div class="week-nav-group">
+            <button class="btn-week-nav" onclick="prevWeek()" title="前 7 天">◀ 上週</button>
+            <button class="btn-week-nav" onclick="goThisWeek()" title="回到今日起算">今日</button>
+            <button class="btn-week-nav" onclick="nextWeek()" title="後 7 天">下週 ▶</button>
+        </div>
+        <div class="week-cards" id="weekCards">
+            <!-- 由 JS 動態生成 7 天卡片 (第 1 天為今日起算) -->
+        </div>
+        <button class="btn-open-month-cal" onclick="openMonthModal()">📅 全月太陽曆</button>
+    </section>
+
+    <!-- 出貨控制列 (出貨日期與列印功能) -->
     <header>
         <div class="header-item">
             <label>出貨日期</label>
             <input type="date" id="shipDate">
+            <button type="button" id="btnDateLock" class="btn-lock locked" onclick="onLockBtnClick()" title="點擊解鎖以允許選擇過去日期">
+                🔒 僅限今日起
+            </button>
         </div>
         <div class="header-item">
             <label>太陽日</label>
             <div class="solar-day-display" id="solarDayVal">000</div>
         </div>
-        <button class="btn-print" onclick="preparePrint()">確認列印</button>
+        <button class="btn-print" id="btnPrint" onclick="preparePrint()">確認列印</button>
         <button class="btn-clear" onclick="resetAll()">全部重置</button>
     </header>
 
@@ -588,6 +983,95 @@
         </div>
     </div>
 
+    <!-- 全月太陽曆彈窗 -->
+    <div class="modal-overlay" id="monthModalOverlay">
+        <div class="modal month-modal">
+            <div class="month-cal-header">
+                <div class="month-cal-title-group">
+                    <span style="font-size: 1.2em;">📅</span>
+                    <input type="number" id="calYearInput" class="cal-nav-input" min="1900" max="2100" step="1" title="輸入或調整年份">
+                    <label for="calYearInput">年</label>
+                    <select id="calMonthSelect" class="cal-nav-select" title="選擇月份">
+                        <option value="0">1 月</option>
+                        <option value="1">2 月</option>
+                        <option value="2">3 月</option>
+                        <option value="3">4 月</option>
+                        <option value="4">5 月</option>
+                        <option value="5">6 月</option>
+                        <option value="7">7 月</option>
+                        <option value="8">8 月</option>
+                        <option value="9">9 月</option>
+                        <option value="10">10 月</option>
+                        <option value="11">11 月</option>
+                        <option value="12">12 月</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <button class="btn-week-nav" onclick="prevMonth()" title="上個月">◀ 上月</button>
+                    <button class="btn-week-nav" onclick="goThisMonth()" title="回到本月">本月</button>
+                    <button class="btn-week-nav" onclick="nextMonth()" title="下個月">下月 ▶</button>
+                    <button class="btn-cancel" style="padding: 5px 10px; margin-left: 4px; font-weight: bold;" onclick="closeMonthModal()">✕</button>
+                </div>
+            </div>
+            <div class="month-cal-grid-header">
+                <div>週一</div><div>週二</div><div>週三</div><div>週四</div><div>週五</div><div style="color:#d97706;">週六</div><div style="color:#d97706;">週日</div>
+            </div>
+            <div class="month-cal-grid" id="monthCalGrid">
+                <!-- 由 JS 生成當月日曆與太陽日 -->
+            </div>
+            <div style="margin-top: 15px; font-size: 0.85em; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
+                <span>💡 點擊任一日期格即可直接設為出貨日期</span>
+                <button class="btn-confirm" style="padding: 5px 16px; font-size: 0.85em;" onclick="closeMonthModal()">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 密碼解鎖防呆彈窗 -->
+    <div class="modal-overlay" id="lockModalOverlay">
+        <div class="modal" style="width: 380px;">
+            <h3 style="margin-top: 0; color: #d97706; display: flex; align-items: center; gap: 8px;">
+                🔒 解除歷史日期限制
+            </h3>
+            <p style="font-size: 0.9em; color: #555; line-height: 1.5; margin: 10px 0 15px 0;">
+                系統預設僅允許列印<b>今日及未來</b>之出貨標籤。<br>若需補印過去的歷史標籤，請輸入解鎖密碼：
+            </p>
+            
+            <div id="unlockView">
+                <div class="modal-field">
+                    <input type="password" id="unlockPwdInput" class="pwd-input" maxlength="10" placeholder="••••" autocomplete="off">
+                    <div style="font-size: 0.78em; color: #888; margin-top: 6px; text-align: right;">
+                        預設密碼：<b style="color: #d97706;">8888</b>
+                    </div>
+                </div>
+                <div class="modal-btns" style="justify-content: space-between; align-items: center;">
+                    <a href="javascript:void(0)" onclick="toggleChangePwdView(true)" style="font-size: 0.85em; color: #1976d2; text-decoration: underline;">修改密碼</a>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-cancel" onclick="closeLockModal()">取消</button>
+                        <button class="btn-confirm" style="background: #d97706;" onclick="submitUnlockPwd()">確認解鎖</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="changePwdView" style="display: none;">
+                <div class="modal-field">
+                    <label style="font-size: 0.85em;">目前舊密碼</label>
+                    <input type="password" id="oldPwdInput" placeholder="請輸入目前密碼">
+                </div>
+                <div class="modal-field">
+                    <label style="font-size: 0.85em;">自訂新密碼 (4~10 碼)</label>
+                    <input type="password" id="newPwdInput" placeholder="請輸入新密碼">
+                </div>
+                <div class="modal-btns" style="justify-content: space-between; align-items: center;">
+                    <a href="javascript:void(0)" onclick="toggleChangePwdView(false)" style="font-size: 0.85em; color: #666;">返回解鎖</a>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-cancel" onclick="toggleChangePwdView(false)">取消</button>
+                        <button class="btn-confirm" onclick="saveNewPassword()">儲存新密碼</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="printArea"></div>
 
     <script>
@@ -621,28 +1105,485 @@
         const productList = document.getElementById('productList');
         const dropZone = document.getElementById('dropZone');
         const printArea = document.getElementById('printArea');
+        const weekCards = document.getElementById('weekCards');
+        const monthModalOverlay = document.getElementById('monthModalOverlay');
+        const calYearInput = document.getElementById('calYearInput');
+        const calMonthSelect = document.getElementById('calMonthSelect');
+        const monthCalGrid = document.getElementById('monthCalGrid');
+        const btnDateLock = document.getElementById('btnDateLock');
+        const btnPrint = document.getElementById('btnPrint');
+        const lockModalOverlay = document.getElementById('lockModalOverlay');
+        const unlockPwdInput = document.getElementById('unlockPwdInput');
 
-        // 初始化：設定日期為今天
-        const today = new Date().toISOString().split('T')[0];
-        shipDateInput.value = today;
-        updateSolarDay();
-        renderProductList();
+        // 日期防呆與密碼鎖定狀態
+        let isDateLocked = true;
+        let pendingDateToSelect = null;
 
-        // 監聽日期變更
-        shipDateInput.addEventListener('change', updateSolarDay);
+        function getSavedPassword() {
+            return localStorage.getItem('organic_lock_pwd') || '8888';
+        }
 
-        function updateSolarDay() {
-            const date = new Date(shipDateInput.value);
-            if (isNaN(date)) return;
+        // 日期工具函式 (取得本地時區 YYYY-MM-DD，避免 UTC 時差偏差)
+        function formatLocalDate(d) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
+        // 計算太陽日 (傳入 Date 物件或 YYYY-MM-DD 字串)
+        function calcSolarDay(input) {
+            let date;
+            if (typeof input === 'string') {
+                const parts = input.split('-');
+                if (parts.length === 3) {
+                    date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                } else {
+                    date = new Date(input);
+                }
+            } else {
+                date = input;
+            }
+            if (!date || isNaN(date.getTime())) return "000";
 
             const start = new Date(date.getFullYear(), 0, 0);
             const diff = (date - start) + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000);
             const oneDay = 1000 * 60 * 60 * 24;
             const day = Math.floor(diff / oneDay);
+            return day.toString().padStart(3, '0');
+        }
 
-            const solarDay = day.toString().padStart(3, '0');
+        // 取得當日起始 Date (午夜 00:00:00)
+        function getStartOfDay(d) {
+            const date = new Date(d);
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        // 當前週曆起始日期 (第 1 天預設為今日起算)
+        let currentWeekStartDate = getStartOfDay(new Date());
+        let calYear = new Date().getFullYear();
+        let calMonth = new Date().getMonth(); // 0 ~ 11
+        let isUserCustomDate = false; // 是否手動選擇過自訂日期
+
+        // 初始化日期為本地今天與鎖定狀態
+        const todayStr = formatLocalDate(new Date());
+        shipDateInput.value = todayStr;
+        updateDateLockState();
+        updateSolarDay();
+        renderProductList();
+        renderWeekBar();
+
+        // 監聽出貨日期變更
+        shipDateInput.addEventListener('change', () => {
+            const currentTodayStr = formatLocalDate(new Date());
+            if (isDateLocked && shipDateInput.value < currentTodayStr) {
+                alert('【防呆提示】出貨日期不能選擇過去日期！如需補印，請先點擊「🔒 解鎖」輸入密碼。');
+                shipDateInput.value = currentTodayStr;
+                openLockModal();
+            }
+            isUserCustomDate = (shipDateInput.value !== currentTodayStr);
+            updateSolarDay();
+            syncViewsWithSelectedDate();
+            updateDateLockState();
+        });
+
+        // 監聽月曆彈窗的年份與月份控制項
+        if (calYearInput) {
+            calYearInput.addEventListener('input', () => {
+                const y = parseInt(calYearInput.value);
+                if (!isNaN(y) && y >= 1900 && y <= 2100) {
+                    calYear = y;
+                    renderMonthCal(false);
+                }
+            });
+            calYearInput.addEventListener('change', () => {
+                const y = parseInt(calYearInput.value);
+                if (!isNaN(y) && y >= 1900 && y <= 2100) {
+                    calYear = y;
+                    renderMonthCal(false);
+                } else {
+                    calYearInput.value = calYear;
+                }
+            });
+        }
+
+        if (calMonthSelect) {
+            calMonthSelect.addEventListener('change', () => {
+                calMonth = parseInt(calMonthSelect.value);
+                renderMonthCal(false);
+            });
+        }
+
+        // 鎖定狀態更新邏輯
+        function updateDateLockState() {
+            const todayDateStr = formatLocalDate(new Date());
+            if (isDateLocked) {
+                shipDateInput.min = todayDateStr;
+                if (shipDateInput.value < todayDateStr) {
+                    shipDateInput.value = todayDateStr;
+                    updateSolarDay();
+                }
+                if (btnDateLock) {
+                    btnDateLock.className = 'btn-lock locked';
+                    btnDateLock.innerHTML = '🔒 僅限今日起';
+                    btnDateLock.title = '點擊解鎖以允許選擇過去日期';
+                }
+                if (btnPrint) {
+                    btnPrint.style.background = 'var(--primary)';
+                    btnPrint.textContent = '確認列印';
+                }
+            } else {
+                shipDateInput.removeAttribute('min');
+                if (btnDateLock) {
+                    btnDateLock.className = 'btn-lock unlocked';
+                    btnDateLock.innerHTML = '🔓 歷史補印中 (點擊上鎖)';
+                    btnDateLock.title = '目前已解除過去日期限制，點擊可立即重新上鎖';
+                }
+                if (btnPrint) {
+                    if (shipDateInput.value < todayDateStr) {
+                        btnPrint.style.background = '#d97706';
+                        btnPrint.textContent = '⚠️ 確認補印歷史標籤';
+                    } else {
+                        btnPrint.style.background = 'var(--primary)';
+                        btnPrint.textContent = '確認列印';
+                    }
+                }
+            }
+            renderWeekBar();
+            if (monthModalOverlay && monthModalOverlay.style.display === 'flex') {
+                renderMonthCal(false);
+            }
+        }
+
+        function onLockBtnClick() {
+            if (isDateLocked) {
+                openLockModal();
+            } else {
+                // 如果已解鎖，點擊可快速上鎖
+                isDateLocked = true;
+                updateDateLockState();
+            }
+        }
+
+        function openLockModal(targetDate = null) {
+            pendingDateToSelect = targetDate;
+            toggleChangePwdView(false);
+            if (unlockPwdInput) unlockPwdInput.value = '';
+            if (lockModalOverlay) lockModalOverlay.style.display = 'flex';
+            setTimeout(() => { if (unlockPwdInput) unlockPwdInput.focus(); }, 50);
+        }
+
+        function closeLockModal() {
+            if (lockModalOverlay) lockModalOverlay.style.display = 'none';
+            pendingDateToSelect = null;
+        }
+
+        function toggleChangePwdView(showChange) {
+            const unlockView = document.getElementById('unlockView');
+            const changePwdView = document.getElementById('changePwdView');
+            const oldPwdInput = document.getElementById('oldPwdInput');
+            const newPwdInput = document.getElementById('newPwdInput');
+            if (unlockView && changePwdView) {
+                unlockView.style.display = showChange ? 'none' : 'block';
+                changePwdView.style.display = showChange ? 'block' : 'none';
+                if (oldPwdInput) oldPwdInput.value = '';
+                if (newPwdInput) newPwdInput.value = '';
+                if (showChange && oldPwdInput) setTimeout(() => oldPwdInput.focus(), 50);
+            }
+        }
+
+        function submitUnlockPwd() {
+            const pwd = unlockPwdInput.value.trim();
+            if (pwd === getSavedPassword()) {
+                isDateLocked = false;
+                closeLockModal();
+                updateDateLockState();
+                if (pendingDateToSelect) {
+                    selectDate(pendingDateToSelect);
+                }
+            } else {
+                alert('密碼錯誤，請重新輸入！(預設密碼：8888)');
+                unlockPwdInput.value = '';
+                unlockPwdInput.focus();
+            }
+        }
+
+        function saveNewPassword() {
+            const oldPwd = document.getElementById('oldPwdInput').value.trim();
+            const newPwd = document.getElementById('newPwdInput').value.trim();
+            if (oldPwd !== getSavedPassword()) {
+                alert('舊密碼輸入錯誤！');
+                return;
+            }
+            if (!newPwd || newPwd.length < 4) {
+                alert('新密碼長度至少需 4 碼以上！');
+                return;
+            }
+            localStorage.setItem('organic_lock_pwd', newPwd);
+            alert('密碼已成功更新！');
+            toggleChangePwdView(false);
+        }
+
+        if (unlockPwdInput) {
+            unlockPwdInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') submitUnlockPwd();
+            });
+        }
+        if (lockModalOverlay) {
+            lockModalOverlay.addEventListener('click', (e) => {
+                if (e.target === lockModalOverlay) closeLockModal();
+            });
+        }
+
+        function updateSolarDay() {
+            const solarDay = calcSolarDay(shipDateInput.value);
             solarDayDisplay.textContent = solarDay;
         }
+
+        function syncViewsWithSelectedDate() {
+            const parts = shipDateInput.value.split('-');
+            if (parts.length === 3) {
+                const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                if (!isNaN(d.getTime())) {
+                    calYear = d.getFullYear();
+                    calMonth = d.getMonth();
+                }
+            }
+            renderWeekBar();
+            if (monthModalOverlay && monthModalOverlay.style.display === 'flex') {
+                renderMonthCal(true);
+            }
+        }
+
+        // 點擊週曆或月曆某一天
+        function selectDate(dateStr) {
+            shipDateInput.value = dateStr;
+            isUserCustomDate = (dateStr !== formatLocalDate(new Date()));
+            updateSolarDay();
+            updateDateLockState();
+            renderWeekBar();
+            renderMonthCal(true);
+        }
+
+        // 渲染 7 天太陽日速查列 (第 1 天固定為起始日/今日起算)
+        function renderWeekBar() {
+            if (!weekCards) return;
+            weekCards.innerHTML = '';
+            const weekDayNames = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+            const selectedStr = shipDateInput.value;
+            const todayDateStr = formatLocalDate(new Date());
+
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(currentWeekStartDate);
+                d.setDate(currentWeekStartDate.getDate() + i);
+
+                const dateStr = formatLocalDate(d);
+                const solarDay = calcSolarDay(d);
+                const isToday = (dateStr === todayDateStr);
+                const isSelected = (dateStr === selectedStr);
+                const isPast = (dateStr < todayDateStr);
+                const isPastDisabled = (isPast && isDateLocked);
+                const displayMonthDay = `${d.getMonth() + 1}/${d.getDate()}`;
+                const dayOfWeekName = weekDayNames[d.getDay()];
+
+                const card = document.createElement('div');
+                card.className = `week-card ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''} ${isPastDisabled ? 'is-past-disabled' : ''}`;
+
+                if (isPastDisabled) {
+                    card.title = `🔒 ${dateStr} 為過去日期 (點擊輸入密碼解鎖補印)`;
+                    card.onclick = () => openLockModal(dateStr);
+                } else {
+                    card.title = `點擊設為出貨日期：${dateStr} (太陽日 ${solarDay})`;
+                    card.onclick = () => selectDate(dateStr);
+                }
+
+                let dayNameHtml = isToday
+                    ? `${dayOfWeekName} <span class="today-tag">今天</span>`
+                    : dayOfWeekName;
+
+                card.innerHTML = `
+                    <div class="wc-day-name">${dayNameHtml}</div>
+                    <div class="wc-date">${displayMonthDay}</div>
+                    <div class="wc-solar">${solarDay}</div>
+                `;
+
+                weekCards.appendChild(card);
+            }
+        }
+
+        // 週曆切換按鈕 (以 7 天為單位平移)
+        function prevWeek() {
+            currentWeekStartDate.setDate(currentWeekStartDate.getDate() - 7);
+            renderWeekBar();
+        }
+
+        function nextWeek() {
+            currentWeekStartDate.setDate(currentWeekStartDate.getDate() + 7);
+            renderWeekBar();
+        }
+
+        function goThisWeek() {
+            currentWeekStartDate = getStartOfDay(new Date());
+            renderWeekBar();
+        }
+
+        // 全月月曆彈窗控制
+        function openMonthModal() {
+            const parts = shipDateInput.value.split('-');
+            if (parts.length === 3) {
+                const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                if (!isNaN(d.getTime())) {
+                    calYear = d.getFullYear();
+                    calMonth = d.getMonth();
+                }
+            }
+            renderMonthCal(true);
+            monthModalOverlay.style.display = 'flex';
+        }
+
+        function closeMonthModal() {
+            monthModalOverlay.style.display = 'none';
+        }
+
+        // 點擊彈窗外部背景關閉
+        if (monthModalOverlay) {
+            monthModalOverlay.addEventListener('click', (e) => {
+                if (e.target === monthModalOverlay) closeMonthModal();
+            });
+        }
+
+        function prevMonth() {
+            calMonth--;
+            if (calMonth < 0) {
+                calMonth = 11;
+                calYear--;
+            }
+            renderMonthCal(true);
+        }
+
+        function nextMonth() {
+            calMonth++;
+            if (calMonth > 11) {
+                calMonth = 0;
+                calYear++;
+            }
+            renderMonthCal(true);
+        }
+
+        function goThisMonth() {
+            const now = new Date();
+            calYear = now.getFullYear();
+            calMonth = now.getMonth();
+            renderMonthCal(true);
+        }
+
+        // 渲染全月月曆 (週一 ~ 週日)
+        function renderMonthCal(updateInputs = true) {
+            if (!monthCalGrid) return;
+            if (updateInputs) {
+                if (calYearInput) calYearInput.value = calYear;
+                if (calMonthSelect) calMonthSelect.value = calMonth;
+            }
+            monthCalGrid.innerHTML = '';
+
+            const selectedStr = shipDateInput.value;
+            const todayDateStr = formatLocalDate(new Date());
+
+            const firstDay = new Date(calYear, calMonth, 1);
+            const lastDay = new Date(calYear, calMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+
+            let firstDayOfWeek = firstDay.getDay();
+            let startOffset = (firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1);
+
+            // 上個月補白
+            const prevMonthLastDay = new Date(calYear, calMonth, 0).getDate();
+            for (let i = startOffset - 1; i >= 0; i--) {
+                const prevDay = prevMonthLastDay - i;
+                const d = new Date(calYear, calMonth - 1, prevDay);
+                const dateStr = formatLocalDate(d);
+                const solar = calcSolarDay(d);
+
+                const cell = createMonthCell(d, dateStr, solar, true, selectedStr, todayDateStr);
+                monthCalGrid.appendChild(cell);
+            }
+
+            // 本月日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const d = new Date(calYear, calMonth, day);
+                const dateStr = formatLocalDate(d);
+                const solar = calcSolarDay(d);
+
+                const cell = createMonthCell(d, dateStr, solar, false, selectedStr, todayDateStr);
+                monthCalGrid.appendChild(cell);
+            }
+
+            // 下個月補齊至 7 的倍數
+            const totalCellsSoFar = startOffset + daysInMonth;
+            const remainingCells = (totalCellsSoFar % 7 === 0) ? 0 : 7 - (totalCellsSoFar % 7);
+            for (let day = 1; day <= remainingCells; day++) {
+                const d = new Date(calYear, calMonth + 1, day);
+                const dateStr = formatLocalDate(d);
+                const solar = calcSolarDay(d);
+
+                const cell = createMonthCell(d, dateStr, solar, true, selectedStr, todayDateStr);
+                monthCalGrid.appendChild(cell);
+            }
+        }
+
+        function createMonthCell(dateObj, dateStr, solarDay, isOtherMonth, selectedStr, todayDateStr) {
+            const isToday = (dateStr === todayDateStr);
+            const isSelected = (dateStr === selectedStr);
+            const isPast = (dateStr < todayDateStr);
+            const isPastDisabled = (isPast && isDateLocked);
+
+            const cell = document.createElement('div');
+            cell.className = `month-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''} ${isPastDisabled ? 'is-past-disabled' : ''}`;
+
+            if (isPastDisabled) {
+                cell.title = `🔒 ${dateStr} 為過去日期 (點擊輸入密碼解鎖補印)`;
+                cell.onclick = () => openLockModal(dateStr);
+            } else {
+                cell.title = `${dateStr} (太陽日 ${solarDay})`;
+                cell.onclick = () => {
+                    selectDate(dateStr);
+                };
+            }
+
+            let todayDot = isToday ? '<div class="month-cell-today-dot" title="今天"></div>' : '';
+
+            cell.innerHTML = `
+                ${todayDot}
+                <div class="month-cell-day">${dateObj.getDate()}</div>
+                <div class="month-cell-solar">${solarDay}</div>
+            `;
+
+            return cell;
+        }
+
+        // 自動跨日更新檢測 (每分鐘 & 喚醒時自動更新)
+        function checkAndAutoUpdateDate() {
+            const latestTodayStr = formatLocalDate(new Date());
+            if (!isUserCustomDate && shipDateInput.value !== latestTodayStr) {
+                shipDateInput.value = latestTodayStr;
+                updateSolarDay();
+                currentWeekStartDate = getStartOfDay(new Date());
+                calYear = new Date().getFullYear();
+                calMonth = new Date().getMonth();
+                renderWeekBar();
+                if (monthModalOverlay && monthModalOverlay.style.display === 'flex') {
+                    renderMonthCal(true);
+                }
+                console.log('系統已跨日，自動更新為最新日期與太陽日：', latestTodayStr);
+            }
+        }
+
+        setInterval(checkAndAutoUpdateDate, 60 * 1000);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') checkAndAutoUpdateDate();
+        });
+        window.addEventListener('focus', checkAndAutoUpdateDate);
 
         // 生成左側品項清單
         function renderProductList() {
@@ -816,6 +1757,11 @@
             if (confirm('確定要清除列印排程嗎？')) {
                 // 僅清除列印排程
                 dropZone.innerHTML = '<div class="empty-hint">請點擊左側品項加入</div>';
+                // 自動恢復鎖定保護
+                if (!isDateLocked) {
+                    isDateLocked = true;
+                    updateDateLockState();
+                }
             }
         }
 
@@ -865,11 +1811,11 @@
                 return;
             }
 
-            // 防呆檢查：檢查每一項的張數與重量是否有效
+            // 1. 檢查張數與重量防呆
             for (let item of items) {
                 const name = item.querySelector('.name').textContent;
 
-                // 1. 檢查張數
+                // 檢查張數
                 const qtyInput = item.querySelector('.qty-input');
                 const qtyVal = qtyInput.value.trim();
                 if (qtyVal === "" || parseFloat(qtyVal) <= 0 || isNaN(parseFloat(qtyVal))) {
@@ -879,7 +1825,7 @@
                     return;
                 }
 
-                // 2. 檢查重量 (僅當規格選擇為 "KG" 時)
+                // 檢查重量 (僅當規格選擇為 "KG" 時)
                 const specSelect = item.querySelector('.spec-select');
                 if (specSelect.value === 'KG') {
                     const weightInput = item.querySelector('.weight-input');
@@ -893,8 +1839,28 @@
                 }
             }
 
+            // 2. 過去歷史日期二次防呆檢查 (方案三 + 方案四)
+            const currentTodayStr = formatLocalDate(new Date());
+            if (shipDateInput.value < currentTodayStr) {
+                if (isDateLocked) {
+                    alert('【防呆阻擋】您設定的出貨日期為過去日期，請先點擊「🔒 僅限今日起」輸入密碼解鎖才能補印！');
+                    openLockModal();
+                    return;
+                }
+                const confirmMsg = `⚠️【歷史日期防呆警示】\n\n您設定的出貨日期為過去日期：${shipDateInput.value} (太陽日 ${solarDayDisplay.textContent})\n\n請問確認是要「補印歷史標籤」嗎？`;
+                if (!confirm(confirmMsg)) {
+                    return;
+                }
+            }
+
             generatePrintContent();
             window.print();
+
+            // 列印完成後自動重新上鎖保護，防止後續作業誤印
+            if (!isDateLocked) {
+                isDateLocked = true;
+                updateDateLockState();
+            }
         }
     </script>
 </body>
