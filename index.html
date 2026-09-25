@@ -825,6 +825,11 @@
                 position: relative;
             }
 
+            .st-content-zone.has-barcode {
+                height: 25mm !important;
+                gap: 0.1mm;
+            }
+
             .st-name {
                 font-size: 12pt;
                 font-weight: 900;
@@ -857,6 +862,18 @@
                 font-weight: 900;
                 line-height: 1.1;
                 white-space: nowrap;
+            }
+
+            .st-barcode-wrap {
+                margin-top: 0.6mm;
+                display: flex;
+                align-items: center;
+            }
+
+            .st-barcode-svg {
+                width: 30mm;
+                height: 8.5mm;
+                display: block;
             }
         }
 
@@ -1086,17 +1103,23 @@
             { name: "有機雪白菇", specs: ["KG", "3KG"] },
             { name: "有機秀珍菇", specs: ["KG", "3KG"] },
             { name: "有機黑蠔菇", specs: ["KG", "1KG"] },
-            { name: "有機白精靈", specs: ["KG", "1KG", "200g"] },
+            { name: "有機白精靈", specs: ["KG", "1KG", "200g"], barcodes: { "200g": "4713331922571" } },
             { name: "有機珊瑚菇", specs: ["KG", "0.6K"] }
         ];
 
         // 從 localStorage 讀取或使用預設
         let customProducts = JSON.parse(localStorage.getItem('organic_products')) || defaultProducts;
 
-        // 強制更新「有機白精靈」的規格，以確保使用者能看到 200g
+        // 強制更新「有機白精靈」的規格與條碼，以確保使用者能看到 200g 且具備條碼
         const whiteElf = customProducts.find(p => p.name === "有機白精靈");
-        if (whiteElf && !whiteElf.specs.includes("200g")) {
-            whiteElf.specs.push("200g");
+        if (whiteElf) {
+            if (!whiteElf.specs.includes("200g")) {
+                whiteElf.specs.push("200g");
+            }
+            if (!whiteElf.barcodes) {
+                whiteElf.barcodes = {};
+            }
+            whiteElf.barcodes["200g"] = "4713331922571";
             localStorage.setItem('organic_products', JSON.stringify(customProducts));
         }
 
@@ -1765,6 +1788,77 @@
             }
         }
 
+        // 離線 EAN-13 向量 SVG 條碼產生器
+        function generateEAN13SVG(code) {
+            if (!code || code.length !== 13) return '';
+            
+            const L = ["0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011", "0110111", "0001011"];
+            const G = ["0100111", "0110011", "0011011", "0100001", "0011101", "0111001", "0000101", "0010001", "0001001", "0010111"];
+            const R = ["1110010", "1100110", "1101100", "1000010", "1011100", "1001110", "1010000", "1000100", "1001000", "1110100"];
+            const PARITIES = [
+                "LLLLLL", "LLGLGG", "LLGGLG", "LLGGGL", "LGLLGG",
+                "LGGLLG", "LGGGLL", "LGLGLG", "LGLGGL", "LGGLGL"
+            ];
+
+            const firstDigit = parseInt(code[0], 10);
+            const parity = PARITIES[firstDigit];
+            if (!parity) return '';
+            
+            let modules = "101"; // Left Guard
+            let isGuard = [true, true, true];
+            
+            // 6 Left digits
+            for (let i = 0; i < 6; i++) {
+                const digit = parseInt(code[i + 1], 10);
+                const useG = parity[i] === 'G';
+                const bitPattern = useG ? G[digit] : L[digit];
+                modules += bitPattern;
+                for (let b = 0; b < 7; b++) isGuard.push(false);
+            }
+            
+            // Center Guard
+            modules += "01010";
+            for (let b = 0; b < 5; b++) isGuard.push(true);
+            
+            // 6 Right digits
+            for (let i = 0; i < 6; i++) {
+                const digit = parseInt(code[i + 7], 10);
+                const bitPattern = R[digit];
+                modules += bitPattern;
+                for (let b = 0; b < 7; b++) isGuard.push(false);
+            }
+            
+            // Right Guard
+            modules += "101";
+            for (let b = 0; b < 3; b++) isGuard.push(true);
+
+            const quietLeft = 8;
+            const totalWidth = 95 + quietLeft + 4; // 107
+            const barHeightNormal = 32;
+            const barHeightGuard = 37;
+            const svgHeight = 46;
+            
+            let rects = '';
+            for (let i = 0; i < modules.length; i++) {
+                if (modules[i] === '1') {
+                    const x = quietLeft + i;
+                    const h = isGuard[i] ? barHeightGuard : barHeightNormal;
+                    rects += `<rect x="${x}" y="0" width="1" height="${h}" fill="black" />`;
+                }
+            }
+
+            const firstChar = code[0];
+            const left6 = code.substring(1, 7);
+            const right6 = code.substring(7, 13);
+
+            return `<svg class="st-barcode-svg" viewBox="0 0 ${totalWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+                ${rects}
+                <text x="3.5" y="42" font-size="9" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="bold" fill="black" text-anchor="middle">${firstChar}</text>
+                <text x="${quietLeft + 22.5}" y="42" font-size="9" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="bold" fill="black" text-anchor="middle" letter-spacing="0.3">${left6}</text>
+                <text x="${quietLeft + 69.5}" y="42" font-size="9" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="bold" fill="black" text-anchor="middle" letter-spacing="0.3">${right6}</text>
+            </svg>`;
+        }
+
         function generatePrintContent() {
             const items = dropZone.querySelectorAll('.queue-item');
             printArea.innerHTML = '';
@@ -1783,17 +1877,24 @@
                     weightText = (weightVal || '0') + 'KG';
                 }
 
+                // 檢查此品項與規格是否有對應的條碼
+                const prod = customProducts.find(p => p.name === name);
+                const barcode = (prod && prod.barcodes && prod.barcodes[spec]) || (name === "有機白精靈" && spec === "200g" ? "4713331922571" : null);
+                const barcodeSvg = barcode ? generateEAN13SVG(barcode) : '';
+                const hasBarcodeClass = barcode ? 'has-barcode' : '';
+
                 for (let i = 0; i < qty; i++) {
                     const sticker = document.createElement('div');
                     sticker.className = 'sticker';
                     sticker.innerHTML = `
-                        <div class="st-content-zone">
+                        <div class="st-content-zone ${hasBarcodeClass}">
                             <div class="st-name">${name}</div>
                             <div class="st-line">重量:${weightText}</div>
                             <div class="st-line">產地:台灣</div>
                             <div class="st-solar-box">${solarDay}</div>
                             <div class="st-cert-body">驗證機構:采園生態驗證有限公司</div>
                             <div class="st-cert-id">證書字號:1-008-180101</div>
+                            ${barcodeSvg ? `<div class="st-barcode-wrap">${barcodeSvg}</div>` : ''}
                         </div>
                     `;
                     printArea.appendChild(sticker);
