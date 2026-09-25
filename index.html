@@ -856,14 +856,17 @@
                 min-width: 7mm;
             }
 
-            /* 僅有機白精靈 200g：縮小太陽日框並上移至右上角，確保完全不遮擋「重量與產地」文字 */
-            .st-content-zone.has-barcode .st-solar-box {
-                top: 0.5mm;
-                right: 1.2mm;
-                font-size: 6.5pt;
-                padding: 0.2mm 0.5mm;
-                min-width: 5.5mm;
+            /* 僅有機白精靈 200g：產地旁的微型太陽日標籤 */
+            .st-solar-inline {
+                display: inline-block;
                 border: 0.8px solid black;
+                padding: 0.1mm 0.8mm;
+                font-size: 6.5pt;
+                font-weight: 900;
+                line-height: 1;
+                vertical-align: middle;
+                margin-left: 2px;
+                letter-spacing: 0.2px;
             }
 
             .st-cert-body,
@@ -1894,12 +1897,11 @@
 
                 let contentHtml = '';
                 if (barcodeSvg) {
-                    // 僅有機白精靈 200g 等具條碼規格：產地移至重量後方，下方生成條碼
+                    // 僅有機白精靈 200g 等具條碼規格：產地移至重量後方，太陽日縮至產地旁邊，下方生成條碼
                     contentHtml = `
                         <div class="st-content-zone has-barcode">
                             <div class="st-name">${name}</div>
-                            <div class="st-line">重量:${weightText}&nbsp;&nbsp;產地:台灣</div>
-                            <div class="st-solar-box">${solarDay}</div>
+                            <div class="st-line">重量:${weightText}&nbsp;&nbsp;產地:台灣&nbsp;&nbsp;<span class="st-solar-inline">${solarDay}</span></div>
                             <div class="st-cert-body">驗證機構:采園生態驗證有限公司</div>
                             <div class="st-cert-id">證書字號:1-008-180101</div>
                             <div class="st-barcode-wrap">${barcodeSvg}</div>
