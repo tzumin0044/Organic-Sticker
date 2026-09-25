@@ -826,8 +826,8 @@
             }
 
             .st-content-zone.has-barcode {
-                height: 21mm !important;
-                gap: 0.15mm;
+                height: 25mm !important;
+                gap: 0.1mm;
             }
 
             .st-name {
@@ -867,6 +867,7 @@
                 vertical-align: middle;
                 margin-left: 2px;
                 letter-spacing: 0.2px;
+                background: white;
             }
 
             .st-cert-body,
@@ -878,14 +879,14 @@
             }
 
             .st-barcode-wrap {
-                margin-top: 0.6mm;
+                margin-top: 0.4mm;
                 display: flex;
                 align-items: center;
             }
 
             .st-barcode-svg {
-                width: 30mm;
-                height: 8.5mm;
+                width: 32mm;
+                height: 9.5mm;
                 display: block;
             }
         }
@@ -1847,8 +1848,8 @@
 
             const quietLeft = 8;
             const totalWidth = 95 + quietLeft + 4; // 107
-            const barHeightNormal = 32;
-            const barHeightGuard = 37;
+            const barHeightNormal = 28;
+            const barHeightGuard = 33;
             const svgHeight = 46;
             
             let rects = '';
@@ -1866,9 +1867,9 @@
 
             return `<svg class="st-barcode-svg" viewBox="0 0 ${totalWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">
                 ${rects}
-                <text x="3.5" y="42" font-size="9" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="bold" fill="black" text-anchor="middle">${firstChar}</text>
-                <text x="${quietLeft + 22.5}" y="42" font-size="9" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="bold" fill="black" text-anchor="middle" letter-spacing="0.3">${left6}</text>
-                <text x="${quietLeft + 69.5}" y="42" font-size="9" font-family="'Helvetica Neue', Arial, sans-serif" font-weight="bold" fill="black" text-anchor="middle" letter-spacing="0.3">${right6}</text>
+                <text x="3.5" y="42" font-size="9.5" font-family="'Courier New', Courier, monospace, Arial, sans-serif" font-weight="900" fill="black" text-anchor="middle">${firstChar}</text>
+                <text x="32" y="42" font-size="9.5" font-family="'Courier New', Courier, monospace, Arial, sans-serif" font-weight="900" fill="black" text-anchor="middle" letter-spacing="0.8">${left6}</text>
+                <text x="79" y="42" font-size="9.5" font-family="'Courier New', Courier, monospace, Arial, sans-serif" font-weight="900" fill="black" text-anchor="middle" letter-spacing="0.8">${right6}</text>
             </svg>`;
         }
 
@@ -1890,13 +1891,15 @@
                     weightText = (weightVal || '0') + 'KG';
                 }
 
-                // 檢查此品項與規格是否有對應的條碼
+                // 檢查此品項與規格是否有對應的條碼 (針對有機白精靈 200g 寬鬆比對)
                 const prod = customProducts.find(p => p.name === name);
-                const barcode = (prod && prod.barcodes && prod.barcodes[spec]) || (name === "有機白精靈" && spec === "200g" ? "4713331922571" : null);
+                const is200 = (spec && (spec === "200g" || spec === "200G" || spec === "200" || spec.toLowerCase().includes("200")));
+                const isWhiteElf200 = (name.includes("白精靈") && is200);
+                const barcode = (prod && prod.barcodes && (prod.barcodes[spec] || (is200 && prod.barcodes["200g"]))) || (isWhiteElf200 ? "4713331922571" : null);
                 const barcodeSvg = barcode ? generateEAN13SVG(barcode) : '';
 
                 let contentHtml = '';
-                if (barcodeSvg) {
+                if (barcodeSvg || isWhiteElf200) {
                     // 僅有機白精靈 200g 等具條碼規格：產地移至重量後方，太陽日縮至產地旁邊，下方生成條碼
                     contentHtml = `
                         <div class="st-content-zone has-barcode">
